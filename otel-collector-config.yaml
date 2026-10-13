@@ -1,0 +1,28 @@
+# OpenTelemetry Collector for the store customer service stack.
+# Receives OTLP (gRPC 4317 / HTTP 4318) from chroma (and any other
+# instrumented service) and exports traces to the zipkin container.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+exporters:
+  zipkin:
+    endpoint: http://zipkin:9411/api/v2/spans
+  # Keep a debug fallback disabled by default; switch to `debug` verbosity
+  # when diagnosing telemetry pipeline issues.
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [zipkin]

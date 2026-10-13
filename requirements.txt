@@ -1,0 +1,74 @@
+# --- Web framework ---
+fastapi>=0.110.0
+uvicorn>=0.27.0
+pydantic>=2.5.0
+Jinja2>=3.1.3
+python-multipart>=0.0.9
+
+# --- LLM / agent stack ---
+langchain>=1.3.3           
+langchain-litellm>=0.2.0   
+litellm>=1.40.0           
+langgraph>=0.2.0          
+deepagents>=0.1.0         
+
+# --- Memory / checkpointer (MySQL) ---
+langgraph-checkpoint-mysql[aiomysql]>=2.0.0   
+pymysql>=1.1.0                     
+
+# --- Vector store ---
+langchain-chroma>=0.1.4    
+chromadb>=0.5.0            
+
+# --- Observability ---
+langfuse>=3.0.0            
+
+# --- SQL data sources ---
+SQLAlchemy>=2.0.23
+trino>=0.329.0            
+pandas>=2.1.0             
+
+# --- Integrations ---
+neonize>=0.1.0            
+
+# --- Config ---
+python-dotenv>=1.0.0
+
+# llm_guard==0.3.16
+
+langchain-community==0.4.2
+
+pymysql==1.2.0
+
+aiomysql==0.3.2
+
+chromadb==1.5.9
+
+langgraph-checkpoint-postgres==3.1.1
+
+psycopg-binary==3.3.4
+
+tenacity==9.1.4
+
+pybreaker==1.4.1
+
+aiobreaker==1.2.0
+
+redis==8.1.0
+
+pyjwt[crypto]==2.13.0
+
+# --- AG-UI protocol (SSE event stream for the chat UI) ---
+ag-ui-protocol==1.0.0
+
+# --- CopilotKit agent middleware ---
+copilotkit==0.1.96
+
+# --- Pandas REPL tool used by agent_tool_stack ---
+langchain-experimental==0.4.2
+
+# --- Classic retrievers (EnsembleRetriever / MultiQueryRetriever) ---
+langchain-classic==1.0.8
+
+# --- Knowledge base ingestion pipeline (chunking/metadata) ---
+llama-index-core==0.14.25

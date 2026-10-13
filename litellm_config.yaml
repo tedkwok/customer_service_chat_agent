@@ -1,0 +1,63 @@
+# LiteLLM proxy configuration for the store customer service stack.
+#
+# Chat models (Z.AI coding plan, OpenAI-compatible endpoint) are exposed as
+# glm-5.3 / glm-5.2 / glm-5.1. The embedding model (intfloat/multilingual-e5-large)
+# is served by the CPU-only vllm-embedding container in docker-compose.yaml and
+# proxied through this gateway as "multilingual-e5-large".
+model_list:
+  # --- Standard chat models (Z.AI) ------------------------------------------
+  - model_name: glm-5.3
+    litellm_params:
+      model: openai/glm-5.3
+      api_base: "https://api.z.ai/api/coding/paas/v4" # REQUIRED for Z.AI Coding Plan
+      api_key: "os.environ/ZAI_API_KEY"
+
+  - model_name: glm-5.2
+    litellm_params:
+      model: openai/glm-5.2
+      api_base: "https://api.z.ai/api/coding/paas/v4"
+      api_key: "os.environ/ZAI_API_KEY"
+
+  - model_name: glm-5.1
+    litellm_params:
+      model: openai/glm-5.1
+      api_base: "https://api.z.ai/api/coding/paas/v4"
+      api_key: "os.environ/ZAI_API_KEY"
+
+  # --- Embedding model (vLLM CPU server) --------------------------------------
+  # vLLM exposes an OpenAI-compatible /v1/embeddings endpoint and does not
+  # authenticate; a dummy key satisfies LiteLLM's openai-provider requirement.
+  - model_name: multilingual-e5-large
+    litellm_params:
+      model: openai/intfloat/multilingual-e5-large
+      api_base: "http://vllm-embedding:8000/v1"
+      api_key: "os.environ/VLLM_API_KEY"
+
+litellm_settings:
+  drop_params: true
+  set_verbose: false
+
+# Guardrails must be a TOP-LEVEL key: litellm_main-latest reads it via
+# init_guardrails_v2 (config.get("guardrails")). The legacy
+# litellm_settings.guardrails parser expects a different, older shape and
+# crashes on {guardrail_name, litellm_params} entries with
+# "GuardrailItem() argument after ** must be a mapping, not str".
+#
+# Self-hosted regex guardrails (guardrails/ package, mounted into the
+# litellm container by docker-compose.yaml). The input guard masks PII in
+# prompts and rejects prompt-injection attempts with HTTP 400; the output
+# guard masks PII/credentials in completions and blocks banned terms.
+# Toggles: GUARDRAIL_MASK_PII, GUARDRAIL_BLOCK_PROMPT_INJECTION,
+# GUARDRAIL_BLOCKED_TERMS (see .env.example).
+guardrails:
+  - guardrail_name: customer-service-input-guard
+    litellm_params:
+      guardrail: guardrails.customer_service_guardrail.CustomerServiceInputGuardrail
+      mode: pre_call
+  - guardrail_name: customer-service-output-guard
+    litellm_params:
+      guardrail: guardrails.customer_service_guardrail.CustomerServiceOutputGuardrail
+      mode: post_call
+
+router_settings:
+  routing_strategy: "latency-based-routing"
